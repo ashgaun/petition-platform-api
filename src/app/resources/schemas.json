@@ -15,6 +15,7 @@
       "email": {
         "type": "string",
         "format": "email",
+        "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
         "minLength": 1,
         "maxLength": 256
       },
