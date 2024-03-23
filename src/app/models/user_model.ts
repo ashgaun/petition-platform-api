@@ -48,17 +48,39 @@ const removeToken = async (token: string): Promise<ResultSetHeader> => {
     return result;
 
 }
-const read = async(id: number): Promise<User[]> => {
+const read = async (id: number): Promise<User[]> => {
     const conn = await getPool().getConnection();
-    const query = "SELECT first_name, last_name, email, auth_token FROM user WHERE id = ?";
+    const query = "select first_name, last_name, email, auth_token from user where id = ?";
     const [rows] = await conn.query(query, [id]);
     await conn.release();
     return rows;
 
 }
 const update = async (firstName: string, lastName: string, email: string, password: string, id: number): Promise<ResultSetHeader> => {
-    const query = "UPDATE user SET first_name = ?, last_name = ?, email =?, password=? WHERE id = ?"
-    const [result] = await getPool().query(query,[firstName, lastName, email, password, id]);
-    return result
+    const conn = await getPool().getConnection();
+    const query = "update user set first_name = ?, last_name = ?, email =?, password=? where id = ?";
+    const [result] = await conn.query(query, [firstName, lastName, email, password, id]);
+    return result;
 }
-export { register, getOne, addToken, removeToken, read, update, getOneById }
+const getImageName = async (id: number): Promise<string> => {
+    const conn = await getPool().getConnection();
+    const query = "Select image_filename from user where id = ?";
+    const [result] = await conn.query(query, [id]);
+    await conn.release();
+    return result.length === 0 ? null : result[0].image_filename;
+}
+const putImageName = async(id: number, imageFilename: string): Promise<void> =>{
+    const conn = await getPool().getConnection();
+    const query = "update user set image_filename = ? where id = ? ";
+    const result =  conn.query(query,[imageFilename, id]);
+    await conn.release();
+
+}
+const deleteImageName = async(id:number): Promise<void> =>{
+    const conn = await getPool().getConnection();
+    const query = "update user set image_filename = null where id = ? ";
+    const result = await conn.query(query, [id]);
+    await conn.release();
+}
+
+export { register, getOne, addToken, removeToken, read, update, getOneById, getImageName,putImageName,deleteImageName }

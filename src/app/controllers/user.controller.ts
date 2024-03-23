@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Logger from '../../config/logger';
-import * as users from '../models/server_model';
+import * as users from '../models/user_model';
 import * as schemas from '../resources/schemas.json';
 import { validate } from '../../config/ajv';
 import { randomUUID } from "node:crypto";

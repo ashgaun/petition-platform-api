@@ -16,13 +16,18 @@ type User ={
      */
     last_name:string,
     /**
-     * user's lastname as entered when created 
+     * user's password as entered when created 
      */
     password: string
      /**
-     * user's lastname as entered when created 
+     * user's token created when they are logged in  
      */
     auth_token: string
+     /**
+     * user's image file name 
+     */
+    image_filename: string
+
 
 
 
