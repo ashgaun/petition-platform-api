@@ -67,7 +67,14 @@ const postsupportertier = async (title: string, description: string,cost: number
     const [result] = await conn.query(query, [title,description, cost, petitionId]);
     await conn.release();
     return result;
+}
 
+const getsupportertiers = async (petitionId: number): Promise<[]> => {
+    const conn = await getPool().getConnection();
+    const query = `SELECT * FROM support_tier WHERE petition_id = ?`;
+    const [result] = await conn.query(query, [petitionId]);
+    await conn.release();
+    return result;
 }
 const getAllCategories = async (): Promise<Category[]> => {
     const conn = await getPool().getConnection();
@@ -83,5 +90,12 @@ const patchpetitions = async (title: string, description: string,categoryId: num
     await conn.release();
     return result;
 }
+const deletepetition = async (id: number): Promise<ResultSetHeader> => {
+    const conn = await getPool().getConnection();
+    const query = `DELETE FROM petition WHERE id = ?`;
+    const [result] = await conn.query(query, [id]);
+    await conn.release();
+    return result;
+}
 
-export { getAll, getPetitionsById,getAllCategories, postpetition, postsupportertier, patchpetitions}
+export { getAll, getPetitionsById,getAllCategories, postpetition, postsupportertier, patchpetitions,deletepetition,getsupportertiers}

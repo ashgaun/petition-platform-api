@@ -1,5 +1,5 @@
 type SupporterTier = {
-    id: number,
+    supportTierId: number,
     petition_id: number,
     title: string,
     description: string,

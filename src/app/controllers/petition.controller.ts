@@ -136,6 +136,8 @@ const getPetition = async (req: Request, res: Response): Promise<void> => {
         if(petitionsById.length === 0){
             res.status(404).send("Id not found");
         }
+        const supportTiers = await petitions.getsupportertiers(petitionId);
+        petitionsById[0].supportTiers = supportTiers;
         res.status(200).send(petitionsById[0]);
         return;
     } catch (err) {
@@ -260,9 +262,37 @@ const editPetition = async (req: Request, res: Response): Promise<void> => {
 
 const deletePetition = async (req: Request, res: Response): Promise<void> => {
     try {
-        // Your code goes here
-        res.statusMessage = "Not Implemented Yet!";
-        res.status(501).send();
+        const id = parseInt(req.params.id,10);
+        if (isNaN(id)){
+            res.status(400).send("id is not a number");
+            return;
+        }
+        const token = req.header('X-Authorization');
+        if (token === undefined){
+            res.status(401).send("you are not authorised to do this");
+            return;
+        }
+        const petition = await petitions.getPetitionsById(id);
+        if (petition.length === 0){
+            res.status(404).send("id not found");
+            return;
+        }
+        const user = await users.getOneById(petition[0].ownerId);
+        if (user[0].auth_token !== token){
+            res.status(403).send("you are not authorised to do this");
+            return;
+        }
+        if (petition[0].numberOfSupporters > 0){
+            res.status(403).send("This petition has supporters");
+            return;
+        }
+        const deletePetitions = await petitions.deletepetition(id);
+        if(deletePetitions.affectedRows === 0){
+            res.status(404).send("Petition not found");
+            return;
+        }
+        res.statusMessage = "Petition deleted successfully";
+        res.status(200).send();
         return;
     } catch (err) {
         Logger.error(err);

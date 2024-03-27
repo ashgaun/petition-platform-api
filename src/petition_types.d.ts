@@ -40,7 +40,7 @@ type Petition ={
      */
     description: string,
     supporterId: number,
-    supporterTier:string,
+    supportTiers: SupporterTier[],
 
 
     
