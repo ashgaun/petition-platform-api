@@ -4,7 +4,7 @@ import * as users from '../models/user_model';
 import * as schemas from '../resources/schemas.json';
 import { validate } from '../../config/ajv';
 import { randomUUID } from "node:crypto";
-import { compare, hash } from "../services/passwords"
+import { compare, hash } from "../services/passwords";
 
 
 const register = async (req: Request, res: Response): Promise<void> => {
@@ -63,6 +63,7 @@ const login = async (req: Request, res: Response): Promise<void> => {
         res.statusMessage = "user has logged in "
         if (await compare(password, uPassword) === false) {
             res.status(401).send()
+            return;
         }
 
         if (user.length === 0) {

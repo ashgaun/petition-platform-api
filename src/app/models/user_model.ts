@@ -69,18 +69,24 @@ const getImageName = async (id: number): Promise<string> => {
     await conn.release();
     return result.length === 0 ? null : result[0].image_filename;
 }
-const putImageName = async(id: number, imageFilename: string): Promise<void> =>{
+const putImageName = async (id: number, imageFilename: string): Promise<void> => {
     const conn = await getPool().getConnection();
     const query = "update user set image_filename = ? where id = ? ";
-    const result =  conn.query(query,[imageFilename, id]);
+    const result = conn.query(query, [imageFilename, id]);
     await conn.release();
 
 }
-const deleteImageName = async(id:number): Promise<void> =>{
+const deleteImageName = async (id: number): Promise<void> => {
     const conn = await getPool().getConnection();
     const query = "update user set image_filename = null where id = ? ";
     const result = await conn.query(query, [id]);
     await conn.release();
 }
-
-export { register, getOne, addToken, removeToken, read, update, getOneById, getImageName,putImageName,deleteImageName }
+const getOneByToken = async (token: string): Promise<User[]> => {
+    const conn = await getPool().getConnection();
+    const query = 'select * from user where auth_token = ?';
+    const [rows] = await conn.query(query, [token]);
+    await conn.release();
+    return rows;
+}
+export { register, getOne, addToken, removeToken, read, update, getOneById, getImageName, putImageName, deleteImageName, getOneByToken }
