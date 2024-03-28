@@ -69,9 +69,9 @@ const postsupportertier = async (title: string, description: string,cost: number
     return result;
 }
 
-const getsupportertiers = async (petitionId: number): Promise<[]> => {
+const getsupportertiers = async (petitionId: number): Promise<SupporterTier[]> => {
     const conn = await getPool().getConnection();
-    const query = `SELECT * FROM support_tier WHERE petition_id = ?`;
+    const query = `SELECT id as supportTierId, petition_id, title, description, cost FROM support_tier WHERE petition_id = ?`;
     const [result] = await conn.query(query, [petitionId]);
     await conn.release();
     return result;
@@ -97,5 +97,25 @@ const deletepetition = async (id: number): Promise<ResultSetHeader> => {
     await conn.release();
     return result;
 }
+const getImageName = async (id: number): Promise<string> => {
+    const conn = await getPool().getConnection();
+    const query = "Select image_filename from petition where id = ?";
+    const [result] = await conn.query(query, [id]);
+    await conn.release();
+    return result.length === 0 ? null : result[0].image_filename;
+}
+const putImageName = async (id: number, imageFilename: string): Promise<void> => {
+    const conn = await getPool().getConnection();
+    const query = "update petition set image_filename = ? where id = ? ";
+    const result = conn.query(query, [imageFilename, id]);
+    await conn.release();
+}
+const deleteImageName = async (id: number): Promise<void> => {
+    const conn = await getPool().getConnection();
+    const query = "update petition set image_filename = null where id = ? ";
+    const result = await conn.query(query, [id]);
+    await conn.release();
+}
 
-export { getAll, getPetitionsById,getAllCategories, postpetition, postsupportertier, patchpetitions,deletepetition,getsupportertiers}
+
+export { getAll, getPetitionsById,getAllCategories, postpetition, postsupportertier, patchpetitions,deletepetition,getsupportertiers,getImageName,putImageName}

@@ -18,7 +18,7 @@ const getAllPetitions = async (req: Request, res: Response): Promise<void> => {
     const supporterId = req.query.supporterId === undefined ? null : parseInt(req.query.supporterId as string, 10);
     const q = req.query.q === undefined ? null : req.query.q.toString().toLowerCase();
     if (req.query.q === "") {
-        res.status(400).send();
+        res.status(400).send("q cannot be empty");
         return;
     }
     if (sortBy && !validSortOptions.includes(sortBy)) {
@@ -127,6 +127,11 @@ const getAllPetitions = async (req: Request, res: Response): Promise<void> => {
 
 const getPetition = async (req: Request, res: Response): Promise<void> => {
     try {
+        const valid = await validate(schemas.petition_search, req.query);
+        if (valid !== true) {
+            res.status(400).send(valid.toString());
+            return;
+        }
         const petitionId = parseInt(req.params.id,10)
         if (isNaN(petitionId)){
             res.status(400).send("id is not a number");
@@ -207,7 +212,7 @@ const editPetition = async (req: Request, res: Response): Promise<void> => {
         const token = req.header('X-Authorization');
         if (token === undefined)
         {
-            res.status(401).send("you are not authorised to do this");
+            res.status(403).send("you are not authorised to do this");
             return;
         }
         const petitionId = parseInt(req.params.id,10);
@@ -279,7 +284,7 @@ const deletePetition = async (req: Request, res: Response): Promise<void> => {
         }
         const user = await users.getOneById(petition[0].ownerId);
         if (user[0].auth_token !== token){
-            res.status(403).send("you are not authorised to do this");
+            res.status(401).send("you are not authorised to do this");
             return;
         }
         if (petition[0].numberOfSupporters > 0){

@@ -56,6 +56,11 @@ const login = async (req: Request, res: Response): Promise<void> => {
     const password = req.body.password;
     try {
         const user = await users.getOne(email)
+        if (user.length === 0) {
+            res.statusMessage = `Bad Request: check your email and password}`;
+            res.status(401).send("Invalid login");
+            return;
+        }
         const uPassword = user[0].password
         Logger.info(user)
         const token = randomUUID()
@@ -153,7 +158,7 @@ const update = async (req: Request, res: Response): Promise<void> => {
             if (req.body.hasOwnProperty("currentPassword")) {
                 if (!await compare(req.body.currentPassword, user[0].password)) {
                     res.statusMessage = "Incorrect currentPassword";
-                    res.status(403).send();
+                    res.status(401).send();
                     return;
                 } else {
                     if (await compare(req.body.password, user[0].password)) {
@@ -165,7 +170,7 @@ const update = async (req: Request, res: Response): Promise<void> => {
                 }
             } else {
                 res.statusMessage = "currentPassword must be supplied to change password";
-                res.status(400).send();
+                res.status(403).send();
                 return;
             }
         }
@@ -187,7 +192,7 @@ const update = async (req: Request, res: Response): Promise<void> => {
             "password": newPassword
         }
 
-        const validation = await validate(schemas.user_register, check);
+        const validation = await validate(schemas.user_edit, check);
         if (validation !== true) {
             res.status(400).send();
             return;

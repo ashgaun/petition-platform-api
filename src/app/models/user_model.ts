@@ -89,4 +89,11 @@ const getOneByToken = async (token: string): Promise<User[]> => {
     await conn.release();
     return rows;
 }
-export { register, getOne, addToken, removeToken, read, update, getOneById, getImageName, putImageName, deleteImageName, getOneByToken }
+const getUserByToken = async (token: string): Promise<User[]> => {
+    const conn = await getPool().getConnection();
+    const query = 'select * from user where auth_token = ?';
+    const [rows] = await conn.query(query, [token]);
+    await conn.release();
+    return rows;
+}
+export { register, getOne, addToken, removeToken, read, update, getOneById, getImageName, putImageName, deleteImageName, getOneByToken, getUserByToken}
