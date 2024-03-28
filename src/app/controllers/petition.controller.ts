@@ -14,19 +14,22 @@ const getAllPetitions = async (req: Request, res: Response): Promise<void> => {
     const sortBy = req.query.sortBy === undefined ? null : req.query.sortBy.toString();
     const categoryIds = req.query.categoryIds === undefined ? null : req.query.categoryIds.toString().split(',').map(id => parseInt(id, 10));
     const supportingCost = req.query.supportingCost === undefined ? null : parseInt(req.query.supportingCost as string, 10);
-    const ownerId = req.query.ownerId === undefined ? null :parseInt(req.query.ownerId as string, 10);
+    const ownerId = req.query.ownerId === undefined ? null : parseInt(req.query.ownerId as string, 10);
     const supporterId = req.query.supporterId === undefined ? null : parseInt(req.query.supporterId as string, 10);
     const q = req.query.q === undefined ? null : req.query.q.toString().toLowerCase();
     if (req.query.q === "") {
-        res.status(400).send("q cannot be empty");
+        res.statusMessage = "q cannot be empty";
+        res.status(400).send();
         return;
     }
     if (sortBy && !validSortOptions.includes(sortBy)) {
-        res.status(400).send("Invalid sort option");
+        res.statusMessage = "Invalid sortBy option";
+        res.status(400).send();
         return;
     }
 
     try {
+
         if (isNaN(supporterId) || isNaN(ownerId) || isNaN(supportingCost)) {
             res.status(400).send("The supporterId or ownerId or supportingCost is not a number");
             return;
@@ -132,14 +135,16 @@ const getPetition = async (req: Request, res: Response): Promise<void> => {
             res.status(400).send(valid.toString());
             return;
         }
-        const petitionId = parseInt(req.params.id,10)
-        if (isNaN(petitionId)){
-            res.status(400).send("id is not a number");
+        const petitionId = parseInt(req.params.id, 10)
+        if (isNaN(petitionId)) {
+            res.statusMessage = "Id must be an integer";
+            res.status(400).send();
             return;
         }
         const petitionsById = await petitions.getPetitionsById(petitionId);
-        if(petitionsById.length === 0){
-            res.status(404).send("Id not found");
+        if (petitionsById.length === 0) {
+            res.statusMessage = "Petition not found";
+            res.status(404).send();
         }
         const supportTiers = await petitions.getsupportertiers(petitionId);
         petitionsById[0].supportTiers = supportTiers;
@@ -162,30 +167,29 @@ const addPetition = async (req: Request, res: Response): Promise<void> => {
         }
         const title = req.body.title;
         const description = req.body.description;
-        const categoryId = parseInt(req.body.categoryId,10);
+        const categoryId = parseInt(req.body.categoryId, 10);
         const supportTiers = req.body.supportTiers;
         const token = req.header('X-Authorization');
-        if (token === undefined){
-            res.status(401).send("you are not authorised to do this");
+        if (token === undefined) {
+            res.statusMessage = "Unauthorized";
+            res.status(401).send();
             return;
         }
-        if (isNaN(categoryId)){
-            res.status(400).send("categoryId is not a number");
+        if (title === undefined || description === undefined || supportTiers === undefined) {
+            res.statusMessage = "title, description or supportTiers is missing";
+            res.status(400).send();
             return;
         }
-        if (title === undefined || description === undefined || supportTiers === undefined){
-            res.status(400).send("title, description or supportTiers is missing");
-            return;
-        }
-        if (title === ""){
-            res.status(400).send("title is empty");
+        if (title === "") {
+            res.statusMessage = "title cannot be empty";
+            res.status(400).send();
             return;
         }
         const user = await users.getOneByToken(token);
-        const addPetitions = await petitions.postpetition(title,description,categoryId,user[0].id,new Date());
+        const addPetitions = await petitions.postpetition(title, description, categoryId, user[0].id, new Date());
         const petitionId = addPetitions.insertId;
-        for (const supportTier of supportTiers){
-            await petitions.postsupportertier(supportTier.title,supportTier.description,supportTier.cost,petitionId)
+        for (const supportTier of supportTiers) {
+            await petitions.postsupportertier(supportTier.title, supportTier.description, supportTier.cost, petitionId)
         }
         const petition = await petitions.getPetitionsById(petitionId);
         res.status(201).send(petition[0]);
@@ -210,50 +214,54 @@ const editPetition = async (req: Request, res: Response): Promise<void> => {
             return;
         }
         const token = req.header('X-Authorization');
-        if (token === undefined)
-        {
-            res.status(403).send("you are not authorised to do this");
+        if (token === undefined) {
+            res.statusMessage = "you are not authorised to do this";
+            res.status(403).send();
             return;
         }
-        const petitionId = parseInt(req.params.id,10);
-        if (isNaN(petitionId)){
-            res.status(400).send("id is not a number");
+        const petitionId = parseInt(req.params.id, 10);
+        if (isNaN(petitionId)) {
+            res.statusMessage = "id is not a number";
+            res.status(400).send();
             return;
         }
         const petition = await petitions.getPetitionsById(petitionId);
-        if (petition.length === 0){
-            res.status(404).send("id not found");
+        if (petition.length === 0) {
+            res.statusMessage = "Petition not found";
+            res.status(404).send();
             return;
         }
         const user = await users.getOneById(petition[0].ownerId);
-        if (user[0].auth_token !== token){
-            res.status(403).send("you are not authorised to do this");
+        if (user[0].auth_token !== token) {
+            res.statusMessage = "you are not authorised to do this";
+            res.status(403).send();
             return;
         }
-        if (user.length === 0){
-            res.status(404).send("id not found");
+        if (user.length === 0) {
+            res.statusMessage = "User not found";
+            res.status(404).send();
             return;
         }
 
 
         let description = req.body.description;
-        if (description === "")
-        {
-        res.status(400).send("No description provided");
-        return;
+        if (description === "") {
+            res.statusMessage = "description cannot be empty";
+            res.status(400).send();
+            return;
         }
         let categoryId = req.body.categoryId;
         let title = req.body.title;
-        if(title === undefined){
+        if (title === undefined) {
             title = petition[0].title;
-         }
-        if (categoryId === undefined){
+        }
+        if (categoryId === undefined) {
             categoryId = petition[0].categoryId;
         }
-        if (description === undefined){
+        if (description === undefined) {
             description = petition[0].description;
         }
-        const patchpetitions = await petitions.patchpetitions(title,description,categoryId,petitionId);
+        const patchpetitions = await petitions.patchpetitions(title, description, categoryId, petitionId);
         res.statusMessage = "Pettition updated successfully";
         res.status(200).send();
         return;
@@ -267,33 +275,39 @@ const editPetition = async (req: Request, res: Response): Promise<void> => {
 
 const deletePetition = async (req: Request, res: Response): Promise<void> => {
     try {
-        const id = parseInt(req.params.id,10);
-        if (isNaN(id)){
-            res.status(400).send("id is not a number");
+        const id = parseInt(req.params.id, 10);
+        if (isNaN(id)) {
+            res.statusMessage = "id is not a number";
+            res.status(400).send();
             return;
         }
         const token = req.header('X-Authorization');
-        if (token === undefined){
-            res.status(401).send("you are not authorised to do this");
+        if (token === undefined) {
+            res.statusMessage = "you are not authorised to do this"
+            res.status(401).send();
             return;
         }
         const petition = await petitions.getPetitionsById(id);
-        if (petition.length === 0){
-            res.status(404).send("id not found");
+        if (petition.length === 0) {
+            res.statusMessage = "Petition not found";
+            res.status(404).send();
             return;
         }
         const user = await users.getOneById(petition[0].ownerId);
-        if (user[0].auth_token !== token){
-            res.status(401).send("you are not authorised to do this");
+        if (user[0].auth_token !== token) {
+            res.statusMessage = "you are not authorised to do this";
+            res.status(401).send();
             return;
         }
-        if (petition[0].numberOfSupporters > 0){
-            res.status(403).send("This petition has supporters");
+        if (petition[0].numberOfSupporters > 0) {
+            res.statusMessage = "Petition has supporters";
+            res.status(403).send();
             return;
         }
         const deletePetitions = await petitions.deletepetition(id);
-        if(deletePetitions.affectedRows === 0){
-            res.status(404).send("Petition not found");
+        if (deletePetitions.affectedRows === 0) {
+            res.statusMessage = "Petition not found";
+            res.status(404).send();
             return;
         }
         res.statusMessage = "Petition deleted successfully";

@@ -38,7 +38,7 @@ const register = async (req: Request, res: Response): Promise<void> => {
     } catch (err) {
         Logger.error(err);
         res.statusMessage = "Internal Server Error";
-        res.status(403).send(`ERROR creating user ${firstName} ${lastName}: ${err}`);
+        res.status(403).send();
         return;
     }
 }
@@ -57,8 +57,8 @@ const login = async (req: Request, res: Response): Promise<void> => {
     try {
         const user = await users.getOne(email)
         if (user.length === 0) {
-            res.statusMessage = `Bad Request: check your email and password}`;
-            res.status(401).send("Invalid login");
+            res.statusMessage = "Bad Request: check your email and password";
+            res.status(401).send();
             return;
         }
         const uPassword = user[0].password
@@ -73,12 +73,11 @@ const login = async (req: Request, res: Response): Promise<void> => {
 
         if (user.length === 0) {
             res.statusMessage = `Bad Request: check your email and password}`;
-            res.status(401).send("Invalid login");
+            res.status(401).send();
             return;
 
         }
         res.statusMessage = "Logged in ";
-
         res.status(200).send({ "userId": user[0].id, "token": token });
         return;
     } catch (err) {
@@ -98,7 +97,8 @@ const logout = async (req: Request, res: Response): Promise<void> => {
             res.status(401).send()
             return
         }
-        res.status(200).send("User logged out ")
+        res.statusMessage = "Logged out";
+        res.status(200).send()
     } catch (err) {
         Logger.error(err);
         res.statusMessage = "Internal Server Error";
@@ -119,7 +119,8 @@ const view = async (req: Request, res: Response): Promise<void> => {
         }
         const result = await users.read(id);
         if (result.length === 0) {
-            res.status(404).send('User not found');
+            res.statusMessage = "User not found";
+            res.status(404).send();
         } else {
             if (result[0].auth_token === req.header('X-Authorization')) {
                 res.status(200).send({ "firstName": result[0].first_name, "lastName": result[0].last_name, "email": result[0].email });
@@ -145,10 +146,12 @@ const update = async (req: Request, res: Response): Promise<void> => {
         }
         const user = await users.getOneById(id);
         if (user.length === 0) {
-            res.status(400).send("no such user");
+            res.statusMessage = "User not found";
+            res.status(400).send();
         }
         if (user[0].auth_token !== req.header('X-Authorization')) {
-            res.send(401).send("Unauthorised");
+            res.statusMessage = "Unauthorized";
+            res.send(401).send();
         }
         let lastName = user[0].last_name;
         let firstName = user[0].first_name;
@@ -176,6 +179,7 @@ const update = async (req: Request, res: Response): Promise<void> => {
         }
         if (req.body.hasOwnProperty("email")) {
             email = req.body.email;
+
         }
         if (req.body.hasOwnProperty("firstName")) {
             firstName = req.body.firstName;
@@ -197,8 +201,14 @@ const update = async (req: Request, res: Response): Promise<void> => {
             res.status(400).send();
             return;
         }
+        if (id !== user[0].id) {
+            res.statusMessage = "Cannt update another user's details";
+            res.status(403).send();
+            return;
+        }
         await users.update(firstName, lastName, email, newPassword, id);
-        res.status(200).send("Updated!");
+        res.statusMessage = "User updated";
+        res.status(200).send();
         return;
     } catch (err) {
         Logger.error(err);

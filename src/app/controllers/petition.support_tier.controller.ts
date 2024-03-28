@@ -57,7 +57,8 @@ const editSupportTier = async (req: Request, res: Response): Promise<void> => {
         const petition = await petitions.getPetitionsById(petitionId);
         const user = await users.getOneById(petition[0].ownerId);
         if (user[0].auth_token !== token) {
-            res.status(403).send("you are not authorised to do this");
+            res.statusMessage = "Unauthorised";
+            res.status(403).send();
             return;
         }
         if (isNaN(petitionId)) {
@@ -114,7 +115,8 @@ const deleteSupportTier = async (req: Request, res: Response): Promise<void> => 
         const petition = await petitions.getPetitionsById(petitionId);
         const user = await users.getOneById(petition[0].ownerId);
         if (user[0].auth_token !== token) {
-            res.status(401).send("you are not authorised to do this");
+            res.statusMessage = "Unauthorised";
+            res.status(401).send();
             return;
         }
         const tierID = parseInt(req.params.tierId, 10);

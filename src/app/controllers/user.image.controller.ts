@@ -41,10 +41,12 @@ const setImage = async (req: Request, res: Response): Promise<void> => {
         const image = req.body;
         const user = await Users.getOneById(id);
         if (user.length === 0) {
-            res.status(403).send("no such user");
+            res.statusMessage = "No such user"
+            res.status(403).send();
         }
         if (user[0].auth_token !== req.header('X-Authorization')) {
-            res.send(403).send("Unauthorised");
+            res.statusMessage = "Unauthorised"
+            res.send(403).send();
         }
         const mimeType = req.header('Content-Type');
         let extension = null
@@ -60,11 +62,12 @@ const setImage = async (req: Request, res: Response): Promise<void> => {
             extension = '.gif';
         }
         if (extension === null) {
-            res.status(403).send("Please use the right format for images");
+            res.statusMessage = "Invalid image type"
+            res.status(403).send();
             return;
         }
         if (image.length === undefined) {
-            res.status(403).send("no image uploaded");
+            res.status(403).send();
             return;
         }
         const fileName = await Users.getImageName(id)
@@ -93,10 +96,12 @@ const deleteImage = async (req: Request, res: Response): Promise<void> => {
         }
         const user = await Users.getOneById(id);
         if (user.length === 0) {
-            res.status(400).send("no such user");
+            res.statusMessage = "User not found";
+            res.status(400).send();
         }
         if (user[0].auth_token !== req.header('X-Authorization')) {
-            res.status(403).send("Unauthorised");
+            res.statusMessage = "Unauthorized";
+            res.status(403).send();
         }
         const fileName = await Users.getImageName(id);
         if (fileName != null && fileName !== "") {

@@ -1,9 +1,9 @@
-import {Request, Response} from "express";
+import { Request, Response } from "express";
 import Logger from "../../config/logger";
 import * as petitions from '../models/petition_model';
 import * as petitionImage from '../models/petition_image';
 const getImage = async (req: Request, res: Response): Promise<void> => {
-    try{
+    try {
         const id = parseInt(req.params.id, 10);
         if (isNaN(id)) {
             res.statusMessage = "Id must be an integer"
@@ -30,7 +30,7 @@ const getImage = async (req: Request, res: Response): Promise<void> => {
 
 
 const setImage = async (req: Request, res: Response): Promise<void> => {
-    try{
+    try {
         const id = parseInt(req.params.id, 10);
         if (isNaN(id)) {
             res.statusMessage = "Id must be an integer"
@@ -40,7 +40,9 @@ const setImage = async (req: Request, res: Response): Promise<void> => {
         const image = req.body;
         const petition = await petitions.getPetitionsById(id);
         if (petition.length === 0) {
-            res.status(403).send("no such petition");
+
+            res.statusMessage = "No such petition"
+            res.status(403).send();
         }
         const mimeType = req.header('Content-Type');
         let extension = null
@@ -56,11 +58,13 @@ const setImage = async (req: Request, res: Response): Promise<void> => {
             extension = '.gif';
         }
         if (extension === null) {
-            res.status(400).send("Please use the right format for images");
+            res.statusMessage = "Invalid image type"
+            res.status(400).send();
             return;
         }
         if (image.length === undefined) {
-            res.status(403).send("no image uploaded");
+            res.statusMessage = "No image uploaded"
+            res.status(403).send();
             return;
         }
         const fileName = await petitions.getImageName(id)
@@ -81,4 +85,4 @@ const setImage = async (req: Request, res: Response): Promise<void> => {
 }
 
 
-export {getImage, setImage};
+export { getImage, setImage };

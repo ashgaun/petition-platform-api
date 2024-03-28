@@ -73,7 +73,8 @@ const addSupporter = async (req: Request, res: Response): Promise<void> => {
             return;
         }
         await supporters.addSupporter(petitionId, user[0].id, supportTierId, message);
-        res.status(201).send("Supporter added!");
+        res.statusMessage = "Supporter added!";
+        res.status(201).send();
         return;
     } catch (err) {
         Logger.error(err);
