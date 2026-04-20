@@ -1,90 +1,107 @@
-# SENG365 Assignment 1 API Server (Petition Site)
+# Petition Platform API
 
-## Running locally
+REST API for a petition platform built with Node.js, Express, TypeScript, and MySQL. This project demonstrates backend application design across authentication, request validation, relational data modelling, media handling, and API documentation in a structured service-oriented codebase.
 
-1. Use `npm install` to populate the `node_modules/` directory with up-to-date packages
-2. Create a file called `.env`, following the instructions in the section below
-3. Go to https://dbadmin.csse.canterbury.ac.nz and create a database with the name that you set in the `.env` file
-2. Run `npm run start` or `npm run debug` to start the server
-3. The server will be accessible on `localhost:4941`
+## Overview
 
-### `.env` file
+The API supports user registration and authentication, petition creation and management, supporter tier workflows, petition support records, and image upload endpoints for users and petitions. It is designed as a backend portfolio project that showcases practical Express application structure, SQL-backed persistence, validation, and file handling.
 
-Create a `.env` file in the root directory of this project including the following information (note that you will need
-to create the database first in phpMyAdmin):
+## Key Features
 
+- User registration, login, logout, and profile management
+- Petition creation, retrieval, update, and deletion
+- Support tier management for petitions
+- Petition supporter and contribution workflows
+- User and petition image upload and retrieval endpoints
+- JSON schema validation with AJV
+- MySQL-backed persistence with a modular model/controller/route structure
+- Structured application logging with Winston
+
+## Tech Stack
+
+- Node.js
+- Express
+- TypeScript
+- MySQL
+- AJV
+- Winston
+
+## Project Structure
+
+```text
+.
+|-- src/
+|   |-- app/
+|   |   |-- controllers/
+|   |   |-- middleware/
+|   |   |-- models/
+|   |   |-- resources/
+|   |   `-- routes/
+|   |-- config/
+|   `-- server.ts
+|-- postman/
+|-- storage/
+|-- api_spec.yaml
+|-- package.json
+`-- tsconfig.json
 ```
-SENG365_MYSQL_HOST=db2.csse.canterbury.ac.nz
-SENG365_MYSQL_USER={your usercode}
-SENG365_MYSQL_PASSWORD={your password}
-SENG365_MYSQL_DATABASE={a database starting with your usercode then an underscore}
+
+## Local Setup
+
+### Prerequisites
+
+- Node.js and npm
+- A MySQL server you can connect to locally or remotely
+- A database user with permission to create tables and insert data
+
+### Installation
+
+1. Install dependencies:
+
+```bash
+npm install
 ```
 
-For example:
+2. Create a `.env` file in the project root using `.env.example` as the template.
 
+3. Create an empty MySQL database matching the name in your `.env` file.
+
+4. Initialize the database schema using [src/app/resources/create_database.sql](/c:/Users/ashut/OneDrive/Documents/UC/2024 semester 1/SENG 365/SENG 365 code/assignment1/aga124/src/app/resources/create_database.sql).
+
+5. Start the API:
+
+```bash
+npm run start
 ```
-SENG365_MYSQL_HOST=db2.csse.canterbury.ac.nz
-SENG365_MYSQL_USER=abc123
-SENG365_MYSQL_PASSWORD=password
-SENG365_MYSQL_DATABASE=abc123_s365
+
+The API runs on `http://localhost:4941` by default.
+
+## Environment Variables
+
+Create a `.env` file in the root directory with values similar to the following:
+
+```env
+SENG365_MYSQL_HOST=localhost
+SENG365_MYSQL_PORT=3306
+SENG365_MYSQL_USER=your_mysql_username
+SENG365_MYSQL_PASSWORD=your_mysql_password
+SENG365_MYSQL_DATABASE=your_database_name
+PORT=4941
 ```
 
-## Some notes about endpoint status codes
+## Available Scripts
 
-The api spec provides several status codes that each endpoint can return. Apart from the 500 'Internal Server Error'
-each of these represents a flow that may be tested. Hopefully from the labs you have seen these status codes before and
-have an understanding of what each represents. A brief overview is provided in the table below.
+- `npm run build` compiles TypeScript into `dist/`
+- `npm run start` builds the project and starts the API server
 
-| Status Code | Status Message        | Description                                                                   | Example                                          |
-|:------------|-----------------------|-------------------------------------------------------------------------------|--------------------------------------------------|
-| 200         | OK                    | Request completed successfully                                                | Successfully get petitions                       |
-| 201         | Created               | Resources created successfully                                                | Successfully create a petition                   |
-| 400         | Bad Request           | The request failed due to client error                                        | Creating a petition without a request body       |
-| 401         | Unauthorised          | The requested failed due invalid authorisation                                | Creating a petition without authorisation header |
-| 403         | Forbidden             | The request is refused by the server                                          | Trying to delete someone else's petition         |
-| 500         | Internal Server Error | The request causes an error and cannot be completed                           |                                                  |
-| 501         | Not Implemented       | The request can not be completed because the functionality is not implemented |                                                  | 
+## API Testing
 
-Note: In some cases we will accept more than one status code as correct, the case for this is when a user asks to
-complete a forbidden action on a resource that does not exist. This is because the response depends on the order of
-operations, if you check the resource is missing first then a 404 makes sense, if you check whether a user is 'allowed'
-to complete the action first a 403 makes sense. In a proper application, you may also think about which one of these
-responses is better, and gives away the least information about the system to the client.
+- [api_spec.yaml](/c:/Users/ashut/OneDrive/Documents/UC/2024 semester 1/SENG 365/SENG 365 code/assignment1/aga124/api_spec.yaml) documents the available endpoints and payloads
+- Use the OpenAPI specification with your preferred API client or testing workflow to validate requests locally against `http://localhost:4941/api/v1`
+- Seed and media assets in `storage/default/` can be used to prepare a local demo environment if you want realistic sample data
 
-## How marking works
+## Notes
 
-A Postman collection has been provided in the `postman` folder, you can easily import this (and the specific
-environment variables) to test your assignment as you work on it. More information about the exact steps can be found in
-Lab 2. **Note:** You will need to copy the images within the files folder to your Postman working directory.
-
-This Postman collection is a subset of the tests your application will be marked against so passing these tests should
-be your highest priority. You may wish to add to this collection yourself to have more tests to validate your work
-against as you go.
-**Note:** The collection provided accounts for about half of the total tests.
-
-## Steps you should take before finishing
-
-Before finalising your code, you should
-
-1. Import a fresh copy of your project from Eng-Git
-2. Create a `.env` file with only the fields discussed above
-3. `run npm install`
-4. `run npm run start`
-5. Run the Postman collection provided and check that the tests are running as expected
-
-These steps will help you find issues such as:
-
-1. Required dependencies not included in your `package.json`
-2. Use of other environment variables that will not be used during marking
-
-## Final notes
-
-We suggest that you do not modify the files within the `src/app/resources` folder as we may update these at any time if there is
-an issue (such as updating the api spec). Whilst you are free to modify the Postman collection it may be safer to do
-this through Postman only and not push the updated collection (or push your updated version under a different name).
-
-Images within the `storage\default` folder should not be removed, when reloading the server these will be copied to
-storage\images where the server can add, update or delete them when running.
-
-If you find an inconsistency or issue with the reference server please reach out to Morgan English
-`morgan.english@canterbury.ac.nz`.
+- `.env`, `node_modules/`, build artifacts, logs, and generated runtime files should not be committed
+- `storage/default/` contains demo assets used by the project and is intentionally tracked
+- The codebase is organized around routes, controllers, and models to keep HTTP concerns, business logic, and data access separate

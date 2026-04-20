@@ -1,16 +1,12 @@
 openapi: 3.0.0
 info:
-  title: "SENG365 2024: Petitions API"
+  title: "Petition Platform API"
   version: 1.0.2
-  description: "This specification documents the petitions API to be implemented for Assignment 1. This API provides all of the server-side functionality necessary in order to implement all the user stories for Assignment 2"
+  description: "OpenAPI specification for a petition platform backend built with Node.js, Express, TypeScript, and MySQL."
 servers:
-  - url: https://seng365.csse.canterbury.ac.nz/api/v1
-    description: "Reference server"
   - url: http://localhost:4941/api/v1
-    description: "Your development server"
+    description: "Local development server"
 tags:
-  - name: backdoor
-    description: "Development-only endpoints for resetting the database or querying it directly.<br>**These endpoints have been implemented for you, any changes to their functionality may cause tests to break**."
   - name: users
     description: "Endpoints for registering, logging in, modifying, and retrieving user information"
   - name: users.images
@@ -24,60 +20,6 @@ tags:
   - name: petitions.images
     description: "Endpoints for retrieving and uploading petition images"
 paths:
-  /reset:
-    post:
-      tags:
-        - backdoor
-      summary: "Force reset of database to original structure."
-      responses:
-        '200':
-          description: "OK"
-        '500':
-          description: "Internal Server Error"
-  /resample:
-    post:
-      tags:
-        - backdoor
-      summary: "Reload sample of data into database."
-      responses:
-        '201':
-          description: "Created"
-        '500':
-          description: "Internal Server Error"
-  /reload:
-    post:
-      tags:
-        - backdoor
-      summary: "Force reset of database to original structure and reload all sample data"
-      responses:
-        201:
-          description: "Created"
-        500:
-          description: "Internal Server Error"
-  /executesql:
-    post:
-      tags:
-        - backdoor
-      summary: "Execute any arbitrary SQL statement provided, and return the output from the database."
-      description: "This is an enormous security hole, and <b>wouldn't</b> be present in any real-world application. However, we're using it for testing purposes in this assignment"
-      requestBody:
-        content:
-          text/plain:
-            schema:
-              title: SqlCommand
-              type: string
-              example: "SELECT * from users;"
-      responses:
-        200:
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: "#/components/schemas/SqlResult"
-                  - $ref: "#/components/schemas/SqlResultSet"
-        500:
-          description: "Internal Server Error"
   /users/register:
     post:
       tags:

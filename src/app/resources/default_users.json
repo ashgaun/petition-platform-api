@@ -20,6 +20,6 @@
     ["johnwheaton@gmail.com", "John", "Wheaton", null, "password"],
     ["tane.mahuta@example.com", "Tane", "Taumata", null, "password"],
     ["bobbyjones@example.com", "Bob", "Jones", null, "password"],
-    ["m@m.com", "Morgan", "English", "user_20.jpeg", "password"]
+    ["alex.parker@example.com", "Alex", "Parker", "user_20.jpeg", "password"]
   ]
 }
